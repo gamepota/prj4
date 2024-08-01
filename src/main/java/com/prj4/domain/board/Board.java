@@ -10,6 +10,6 @@ public class Board {
     private String title;
     private String content;
     private String writer;
-    // 시간 추가
+    //
     private LocalDateTime inserted;
 }
