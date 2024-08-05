@@ -37,7 +37,7 @@ public class BoardService {
                 mapper.insertFileName(board.getId(), file.getOriginalFilename());
                 // 실제 파일 저장
                 // 부모 디렉토기 만들기
-                String dir = STR."C:/Temp/prj2/\{board.getId()}";
+                String dir = STR."C:/Temp/prj4/\{board.getId()}";
                 File dirFile = new File(dir);
                 if (!dirFile.exists()) {
                     dirFile.mkdirs();
@@ -45,7 +45,7 @@ public class BoardService {
 
 
                 //파일경로
-                String path = STR."C:/Temp/prj2/\{board.getId()}/\{file.getOriginalFilename()}";
+                String path = STR."C:/Temp/prj4/\{board.getId()}/\{file.getOriginalFilename()}";
                 File destination = new File(path);
                 file.transferTo(destination);
             }
