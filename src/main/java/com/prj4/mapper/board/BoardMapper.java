@@ -48,5 +48,11 @@ public interface BoardMapper {
             """
     )
     int update(Board board);
+
+    @Delete("""
+            DELETE FROM board
+            WHERE member_id = #{memberId}
+            """)
+    int deletByMemberId(Integer id);
 }
 

@@ -1,6 +1,7 @@
 package com.prj4.service.member;
 
 import com.prj4.domain.member.Member;
+import com.prj4.mapper.board.BoardMapper;
 import com.prj4.mapper.member.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import java.util.Map;
 @Transactional(rollbackFor = Exception.class)
 public class MemberService {
     final MemberMapper mapper;
+    private final BoardMapper boardMapper;
 
 
     final BCryptPasswordEncoder passwordEncoder; // 단방향성으로만 인코딩 디코딩됨
@@ -81,6 +83,8 @@ public class MemberService {
     }
 
     public void remove(Integer id) {
+
+        boardMapper.deletByMemberId(id);
         mapper.deleteById(id);
     }
 

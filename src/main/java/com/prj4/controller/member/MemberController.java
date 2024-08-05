@@ -83,7 +83,7 @@ public class MemberController {
             service.remove(member.getId());
             return ResponseEntity.ok().build();
         }
-        // todo: forbidden으로 수정하기
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
