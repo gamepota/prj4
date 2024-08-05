@@ -10,24 +10,30 @@ public interface BoardMapper {
 
 
     @Insert("""
-            INSERT INTO board (title, content, writer)
-            VALUES (#{title}, #{content}, #{writer})
+                INSERT INTO board (title, content, member_id)
+            VALUES (#{title}, #{content}, #{memberId})
             """)
     int insert(Board board);
 
+
     @Select("""
-                SELECT id, title, content, writer 
-                FROM board 
-                ORDER BY id DESC
+                       SELECT b.id,
+                              b.title,
+                              m.nick_name writer
+                       FROM board b JOIN member m ON b.member_id = m.id
+                       ORDER BY b.id DESC
+
+
             """)
     List<Board> selectAll();
 
     @Select("""
-            SELECT *
-            FROM board
+            SELECT b.id, b.title, b.content, b.inserted , m.nick_name writer
+            FROM board b JOIN member m ON b.member_id = m.id
             WHERE id = #{id}
-                        """)
+            """)
     Board selectById(Integer id);
+
 
     @Delete("""
             DELETE FROM board

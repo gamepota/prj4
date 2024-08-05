@@ -1,8 +1,11 @@
 package com.prj4.service.board;
 
 import com.prj4.domain.board.Board;
+import com.prj4.domain.member.Member;
 import com.prj4.mapper.board.BoardMapper;
+import com.prj4.mapper.member.MemberMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardMapper mapper;
+    private final MemberMapper memberMapper;
 
 
-    public void add(Board board) {
+    public void add(Board board, Authentication authentication) {
+        Member member = memberMapper.selectByEmail(authentication.getName());
+        board.setMemberId(Integer.valueOf(authentication.getName()));
         mapper.insert(board);
     }
 
@@ -30,10 +36,6 @@ public class BoardService {
             return false;
         }
 
-
-        if (board.getWriter() == null || board.getWriter().isBlank()) {
-            return false;
-        }
         return true;
     }
 

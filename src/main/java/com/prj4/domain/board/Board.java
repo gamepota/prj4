@@ -9,7 +9,8 @@ public class Board {
     private Integer id;
     private String title;
     private String content;
-    private String writer;
+    private String writer; // nickname
+    private Integer memberId;
     //
     private LocalDateTime inserted;
 }
