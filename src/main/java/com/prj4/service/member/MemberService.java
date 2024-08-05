@@ -1,8 +1,10 @@
 package com.prj4.service.member;
 
+import com.prj4.domain.board.Board;
 import com.prj4.domain.member.Member;
 import com.prj4.mapper.board.BoardMapper;
 import com.prj4.mapper.member.MemberMapper;
+import com.prj4.service.board.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 public class MemberService {
     final MemberMapper mapper;
     private final BoardMapper boardMapper;
-
+    private final BoardService boardService;
 
     final BCryptPasswordEncoder passwordEncoder; // 단방향성으로만 인코딩 디코딩됨
     final JwtEncoder jwtEncoder;
@@ -85,9 +87,16 @@ public class MemberService {
     }
 
     public void remove(Integer id) {
+        List<Board> boardList = boardMapper.selectByMemberId(id);
 
-        boardMapper.deleteByMemberId(id);
+
+// 각 게시물 지우기
+        boardList.forEach(board -> boardService.delete(board.getId()));
+// 좋아요 지우기
+        boardMapper.deleteLikeByMemberId(id);
+//member 테이블에서 지우기
         mapper.deleteById(id);
+
     }
 
 

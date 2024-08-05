@@ -63,6 +63,7 @@ public interface MemberMapper {
             """)
     int update(Member member);
 
+
     @Select("""
             SELECT name
             FROM authority
