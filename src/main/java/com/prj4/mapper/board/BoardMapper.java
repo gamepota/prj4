@@ -30,7 +30,7 @@ public interface BoardMapper {
     @Select("""
             SELECT b.id, b.title, b.content, b.inserted , m.nick_name writer
             FROM board b JOIN member m ON b.member_id = m.id
-            WHERE id = #{id}
+            WHERE b.id = #{id}
             """)
     Board selectById(Integer id);
 
