@@ -3,6 +3,7 @@ package com.prj4.controller.member;
 import com.prj4.domain.member.Member;
 import com.prj4.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +39,7 @@ public class MemberController {
 
 
     @GetMapping(value = "check", params = "nickName")
-    public ResponseEntity checkNickName(@RequestParam("nickName") String
-                                                nickName) {
+    public ResponseEntity checkNickName(@RequestParam("nickName") String nickName) {
         Member member = service.getByNickName(nickName);
         if (member == null) {
             return ResponseEntity.notFound().build();
@@ -50,7 +50,7 @@ public class MemberController {
 
 
     }
-
+    
     @GetMapping("list")
     public List<Member> list() {
         return service.list();
@@ -67,6 +67,18 @@ public class MemberController {
 
 
     }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity delete(@RequestBody Member member) {
+        if (service.hasAccess(member)) {
+            service.remove(member.getId());
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+
+    }
 }
+
 
 
