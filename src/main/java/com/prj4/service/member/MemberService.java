@@ -114,7 +114,11 @@ public class MemberService {
     }
 
 
-    public boolean hasAccessModify(Member member) {
+    public boolean hasAccessModify(Member member, Authentication authentication) {
+        if (!authentication.getName().equals(member.getId().toString())) {
+            return false;
+        }
+
         Member dbMember = mapper.selectById(member.getId());
         if (dbMember == null) {
             return false;
