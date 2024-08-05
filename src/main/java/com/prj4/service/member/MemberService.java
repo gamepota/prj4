@@ -68,6 +68,11 @@ public class MemberService {
     public List<Member> list() {
         return mapper.selectAll();
     }
+
+    public Member getById(Integer id) {
+        return mapper.selectById(id);
+    }
+
 }
 
 
