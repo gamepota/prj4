@@ -3,6 +3,7 @@ package com.prj4.service.member;
 import com.prj4.domain.board.Board;
 import com.prj4.domain.member.Member;
 import com.prj4.mapper.board.BoardMapper;
+import com.prj4.mapper.comment.CommentMapper;
 import com.prj4.mapper.member.MemberMapper;
 import com.prj4.service.board.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +27,12 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class MemberService {
     final MemberMapper mapper;
-    private final BoardMapper boardMapper;
-    private final BoardService boardService;
-
     final BCryptPasswordEncoder passwordEncoder; // 단방향성으로만 인코딩 디코딩됨
     final JwtEncoder jwtEncoder;
+    private final BoardMapper boardMapper;
+    private final BoardService boardService;
+    private final CommentMapper commentMapper;
+
 
     public void add(Member member) {
         member.setPassword(passwordEncoder.encode(member.getPassword()));
@@ -94,6 +96,8 @@ public class MemberService {
         boardList.forEach(board -> boardService.delete(board.getId()));
 // 좋아요 지우기
         boardMapper.deleteLikeByMemberId(id);
+        //댓글 삭제
+        commentMapper.deleteByMemberId(id);
 //member 테이블에서 지우기
         mapper.deleteById(id);
 
