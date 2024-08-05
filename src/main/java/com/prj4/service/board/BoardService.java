@@ -1,16 +1,21 @@
 package com.prj4.service.board;
 
 import com.prj4.domain.board.Board;
-import com.prj4.domain.member.Member;
+import com.prj4.domain.board.BoardFile;
 import com.prj4.mapper.board.BoardMapper;
 import com.prj4.mapper.member.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -20,10 +25,33 @@ public class BoardService {
     private final MemberMapper memberMapper;
 
 
-    public void add(Board board, Authentication authentication) {
-        Member member = memberMapper.selectByEmail(authentication.getName());
+    public void add(Board board, MultipartFile[] files, Authentication authentication) throws IOException {
         board.setMemberId(Integer.valueOf(authentication.getName()));
+        // 게시물 저장
         mapper.insert(board);
+
+
+        // db에 해당 게시물의 파일 목록 저장
+        if (files != null) {
+            for (MultipartFile file : files) {
+                mapper.insertFileName(board.getId(), file.getOriginalFilename());
+                // 실제 파일 저장
+                // 부모 디렉토기 만들기
+                String dir = STR."C:/Temp/prj2/\{board.getId()}";
+                File dirFile = new File(dir);
+                if (!dirFile.exists()) {
+                    dirFile.mkdirs();
+                }
+
+
+                //파일경로
+                String path = STR."C:/Temp/prj2/\{board.getId()}/\{file.getOriginalFilename()}";
+                File destination = new File(path);
+                file.transferTo(destination);
+            }
+        }
+
+
     }
 
 
@@ -44,7 +72,7 @@ public class BoardService {
 
     public Map<String, Object> list(Integer page, String searchType, String keyword) {
         Map pageInfo = new HashMap();
-        Integer countAll = mapper.countAllWithSearch(searchType, keyword);
+        Integer countAll = mapper.countAllwithSearch(searchType, keyword);
 
 
         Integer offset = (page - 1) * 10;
@@ -76,16 +104,79 @@ public class BoardService {
 
 
     public Board get(Integer id) {
-        return mapper.selectById(id);
+        Board board = mapper.selectById(id);
+        List<String> fileNames = mapper.selectFileNameByBoardId(id);
+        //  http://172.30.1.24:8888/{id}/{name}
+        List<BoardFile> files = fileNames.stream()
+                .map(name -> new BoardFile(name, STR." http://172.30.1.24:8888/\{id}/\{name}"))
+                .toList();
+
+
+        board.setFileList(files);
+
+
+        return board;
     }
 
 
     public void delete(Integer id) {
+        // file 명 조회
+        List<String> fileNames = mapper.selectFileNameByBoardId(id);
+
+
+        // disk 에 있는 file
+        String dir = STR."C:/Temp/prj2/\{id}/";
+        for (String fileName : fileNames) {
+            File file = new File(dir + fileName);
+            file.delete();
+        }
+        File dirFile = new File(dir);
+        if (dirFile.exists()) {
+            dirFile.delete();
+        }
+
+
+        // board_file
+        mapper.deleteFileByBoardId(id);
+
+
+        // board
         mapper.deleteById(id);
     }
 
 
-    public void edit(Board board) {
+    public void edit(Board board, List<String> removeFileList, MultipartFile[] addFileList) throws IOException {
+        if (removeFileList != null && removeFileList.size() > 0) {
+            for (String fileName : removeFileList) {
+                // disk의 파일 삭제
+                String path = STR."C:/Temp/prj2/\{board.getId()}/\{fileName}";
+                File file = new File(path);
+                file.delete();
+                // db records 삭제
+                mapper.deleteFileByBoardIdAndName(board.getId(), fileName);
+            }
+        }
+
+
+        if (addFileList != null && addFileList.length > 0) {
+            List<String> fileNameList = mapper.selectFileNameByBoardId(board.getId());
+            for (MultipartFile file : addFileList) {
+                String fileName = file.getOriginalFilename();
+                if (!fileNameList.contains(fileName)) {
+                    // 새 파일이 기존에 없을 때만 db에 추가
+                    mapper.insertFileName(board.getId(), fileName);
+                }
+                // disk 에 쓰기
+                File dir = new File(STR."C:/Temp/prj2/\{board.getId()}");
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                String path = STR."C:/Temp/prj2/\{board.getId()}/\{fileName}";
+                File destination = new File(path);
+                file.transferTo(destination);
+            }
+        }
+
         mapper.update(board);
     }
 
