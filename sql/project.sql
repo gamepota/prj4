@@ -46,5 +46,20 @@ SELECT *
 FROM board
 ORDER BY id DESC;
 
+#권한 테이블 생성
+CREATE TABLE authority
+(
+    member_id INT         NOT NULL REFERENCES member (id),
+    name      VARCHAR(20) NOT NULL,
+    PRIMARY KEY (member_id, name)
+);
+
+
+INSERT INTO authority (member_id, name)
+VALUES (2, 'admin');
+
+
+
+
 
 
