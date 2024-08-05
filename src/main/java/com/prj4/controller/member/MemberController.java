@@ -3,10 +3,8 @@ package com.prj4.controller.member;
 import com.prj4.domain.member.Member;
 import com.prj4.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,10 +13,41 @@ public class MemberController {
 
     private final MemberService service;
 
+
     @PostMapping("signup")
-    public void signup(@RequestBody Member member) {
-//        System.out.println("member = " + member);
-        service.add(member);
+    public ResponseEntity signup(@RequestBody Member member) {
+        if (service.validate(member)) {
+            service.add(member);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
+
+    @GetMapping(value = "check", params = "email")
+    public ResponseEntity checkEmail(@RequestParam("email") String email) {
+        Member member = service.getByEmail(email);
+        if (member == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(email);
+    }
+
+
+    @GetMapping(value = "check", params = "nickName")
+    public ResponseEntity checkNickName(@RequestParam("nickName") String
+                                                nickName) {
+        Member member = service.getByNickName(nickName);
+        if (member == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+        return ResponseEntity.ok(nickName);
+
+
+    }
+
 }
 
