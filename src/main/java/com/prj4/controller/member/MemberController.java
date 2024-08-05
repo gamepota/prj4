@@ -50,7 +50,7 @@ public class MemberController {
 
 
     }
-    
+
     @GetMapping("list")
     public List<Member> list() {
         return service.list();
@@ -78,6 +78,17 @@ public class MemberController {
 
 
     }
+
+    @PutMapping("modify")
+    public ResponseEntity modify(@RequestBody Member member) {
+        if (service.hasAccessModify(member)) {
+            service.modify(member);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
 }
 
 
