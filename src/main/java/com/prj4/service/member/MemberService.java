@@ -6,6 +6,7 @@ import com.prj4.mapper.member.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -103,7 +104,7 @@ public class MemberService {
         return passwordEncoder.matches(member.getPassword(), dbMember.getPassword());
     }
 
-    public void modify(Member member) {
+    public Map<String, Object> modify(Member member, Authentication authentication) {
         if (member.getPassword() != null && member.getPassword().length() > 0) {
             // 패스워드가 입려괴었으니 바꾸기
             member.setPassword(passwordEncoder.encode(member.getPassword()));
@@ -112,6 +113,19 @@ public class MemberService {
             member.setPassword(dbmember.getPassword());
         }
         mapper.update(member);
+        String token = "";
+
+
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Map<String, Object> claims = jwt.getClaims();
+        JwtClaimsSet.Builder jwtClaimsSetBuilder = JwtClaimsSet.builder();
+        claims.forEach(jwtClaimsSetBuilder::claim);
+        jwtClaimsSetBuilder.claim("nickName", member.getNickName());
+
+
+        JwtClaimsSet jwtClaimsSet = jwtClaimsSetBuilder.build();
+        token = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+        return Map.of("token", token);
     }
 
 
