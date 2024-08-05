@@ -86,7 +86,7 @@ public class MemberService {
 
     public void remove(Integer id) {
 
-        boardMapper.deletByMemberId(id);
+        boardMapper.deleteByMemberId(id);
         mapper.deleteById(id);
     }
 
