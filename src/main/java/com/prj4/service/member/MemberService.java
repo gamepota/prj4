@@ -3,6 +3,7 @@ package com.prj4.service.member;
 import com.prj4.domain.member.Member;
 import com.prj4.mapper.member.MemberMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +14,13 @@ public class MemberService {
     final MemberMapper mapper;
 
 
+    final BCryptPasswordEncoder passwordEncoder; // 단방향성으로만 인코딩 디코딩됨
+
+
     public void add(Member member) {
+        member.setPassword(passwordEncoder.encode(member.getPassword()));
+        member.setEmail(member.getEmail().trim());
+        member.setNickName(member.getNickName().trim());
         mapper.insert(member);
     }
 
